@@ -3,10 +3,38 @@ package main
 import (
     "fmt"
     "os"
+    "net"
+)
+
+const (
+    CONN_HOST = "localhost"
+    CONN_PORT = "4444"
+    CONN_TYPE = "tcp"
 )
 
 func server() {
+    fmt.Println("calling server")
 
+
+    listen, error := net.Listen(CONN_TYPE, CONN_HOST + ":" + CONN_PORT)
+    if error != nil {
+        fmt.Println("Error listening:", error.Error())
+        os.Exit(1)    //TODO: modfiy this?
+    }
+
+    fmt.Println("Listening on " + CONN_HOST + ":" + CONN_PORT)
+
+    connection, error := listen.Accept()
+    if error != nil {
+        fmt.Println("Error accepting: ", error.Error())
+        os.Exit(1)
+    }
+   // handle_request(connection)
+    connection.Close() //should be done only AFTER req handled
+
+
+    listen.Close()
+    fmt.Println("at end of call to server")
 }
 
 func main() {
@@ -25,7 +53,7 @@ func main() {
     actor := args[0]
 
     if actor == "server" {         
-        fmt.Println("is server")
+        server()
     } else if actor == "client" {
         fmt.Println("is client")
 
