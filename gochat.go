@@ -4,6 +4,8 @@ import (
     "fmt"
     "os"
     "net"
+    "bytes"
+    "io"
 )
 
 const (
@@ -14,6 +16,17 @@ const (
 
 func handle_connection(conn net.Conn) {
     fmt.Println("handling connection")
+   // status, err := bufio.NewReader(conn).ReadString('\n')
+
+    var buf bytes.Buffer
+    io.Copy(&buf, conn)
+   // fmt.Println("total size:", buf.Len())
+    fmt.Printf("buffer: %s\n", buf.String())
+
+
+    fmt.Println("after status") 
+
+
     conn.Close()
 
 }
@@ -52,7 +65,7 @@ func client() {
         fmt.Println("Error dialing:", err.Error())
         os.Exit(1)    //TODO: modfiy this?
     }
-    fmt.Fprintf(conn, "first line\n")
+    fmt.Fprintf(conn, "first input\n")
   //  status, err := bufio.NewReader(conn).ReadString('\n')
 
     fmt.Println("at end of call to client")
