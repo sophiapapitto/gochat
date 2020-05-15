@@ -12,29 +12,50 @@ const (
     CONN_TYPE = "tcp"
 )
 
+func handle_connection(conn net.Conn) {
+    fmt.Println("handling connection")
+    conn.Close()
+
+}
+
 func server() {
     fmt.Println("calling server")
 
 
-    listen, error := net.Listen(CONN_TYPE, CONN_HOST + ":" + CONN_PORT)
-    if error != nil {
-        fmt.Println("Error listening:", error.Error())
+    listen, err := net.Listen(CONN_TYPE, CONN_HOST + ":" + CONN_PORT)
+    if err != nil {
+        fmt.Println("Error listening:", err.Error())
         os.Exit(1)    //TODO: modfiy this?
     }
 
+    defer listen.Close()  //Does this ever actually happen? TODO: exit gracefully.
     fmt.Println("Listening on " + CONN_HOST + ":" + CONN_PORT)
 
-    connection, error := listen.Accept()
-    if error != nil {
-        fmt.Println("Error accepting: ", error.Error())
-        os.Exit(1)
+    for {
+        conn, err := listen.Accept()
+        if err != nil {
+            fmt.Println("Error accepting: ", err.Error())
+            os.Exit(1)
+        }
+        go handle_connection(conn)
     }
-   // handle_request(connection)
-    connection.Close() //should be done only AFTER req handled
-
-
+    
     listen.Close()
     fmt.Println("at end of call to server")
+}
+
+func client() {
+    fmt.Println("calling client")
+
+    conn, err := net.Dial(CONN_TYPE, CONN_HOST + ":" + CONN_PORT)
+    if err != nil {
+        fmt.Println("Error dialing:", err.Error())
+        os.Exit(1)    //TODO: modfiy this?
+    }
+    fmt.Fprintf(conn, "first line\n")
+  //  status, err := bufio.NewReader(conn).ReadString('\n')
+
+    fmt.Println("at end of call to client")
 }
 
 func main() {
@@ -55,7 +76,7 @@ func main() {
     if actor == "server" {         
         server()
     } else if actor == "client" {
-        fmt.Println("is client")
+        client()
 
     } else {
         fmt.Println("ERROR: arg 0 malformed; must be 'client' or 'server")
@@ -63,6 +84,6 @@ func main() {
         return
     }
 
-    fmt.Println("returning from main successfully")
+    fmt.Println("returning from main")
 
 }
